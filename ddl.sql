@@ -6,8 +6,7 @@ USE University;
 -- Professor table
 CREATE TABLE Professor (
     ssn CHAR(9) PRIMARY KEY,
-    first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50) NOT NULL,
+    name VARCHAR(100) NOT NULL,
     street_address VARCHAR(100) NOT NULL,
     city VARCHAR(50) NOT NULL,
     state CHAR(2) NOT NULL,
@@ -104,9 +103,9 @@ CREATE TABLE Enrollment (
 
 -- Insert Professors (3)
 INSERT INTO Professor VALUES 
-('123456789', 'James', 'Choi', '123 Oak Street', 'Fullerton', 'CA', '94704', '714', '5551234', 'M', 'Professor', 120000.00, 'PhD Computer Science, MS Mathematics'),
-('234567890', 'Shawn', 'Wang', '456 Elm Avenue', 'Fullerton', 'CA', '94705', '714', '5552345', 'M', 'Professor', 95000.00, 'PhD Mathematics, MS Statistics'),
-('345678901', 'Michael', 'Franklin', '789 Pine Road', 'Fullerton', 'CA', '94706', '714', '5553456', 'M', 'Assistant Professor', 85000.00, 'PhD Physics, MS Electrical Engineering');
+('123456789', 'James Choi', '123 Oak Street', 'Fullerton', 'CA', '94704', '714', '5551234', 'M', 'Professor', 120000.00, 'PhD Computer Science, MS Mathematics'),
+('234567890', 'Shawn X Wang', '456 Elm Avenue', 'Fullerton', 'CA', '94705', '714', '5552345', 'M', 'Professor', 95000.00, 'PhD Computer Science, MS Statistics'),
+('345678901', 'Michael Franklin', '789 Pine Road', 'Fullerton', 'CA', '94706', '714', '5553456', 'M', 'Assistant Professor', 85000.00, 'PhD Physics, MS Electrical Engineering');
 
 -- Insert Departments (2)
 INSERT INTO Department VALUES
