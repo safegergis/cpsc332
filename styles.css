@@ -1,0 +1,223 @@
+/* University Database System - Common Styles */
+
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2980b9;
+    --accent-color: #e74c3c;
+    --light-gray: #f5f5f5;
+    --medium-gray: #e0e0e0;
+    --dark-gray: #333333;
+    --success-color: #2ecc71;
+    --text-color: #333333;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--light-gray);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+
+header .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.site-title {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.main-nav ul {
+    display: flex;
+    list-style: none;
+}
+
+.main-nav li {
+    margin-left: 1.5rem;
+}
+
+.main-nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.main-nav a:hover {
+    color: var(--medium-gray);
+}
+
+h1, h2, h3 {
+    margin-bottom: 1rem;
+    color: var(--dark-gray);
+}
+
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--medium-gray);
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+button,
+.btn,
+input[type="submit"] {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+button:hover,
+.btn:hover,
+input[type="submit"]:hover {
+    background-color: var(--secondary-color);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    box-shadow: var(--shadow);
+}
+
+th, td {
+    padding: 0.75rem;
+    text-align: left;
+    border: 1px solid var(--medium-gray);
+}
+
+th {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: var(--light-gray);
+}
+
+.section {
+    margin-bottom: 2rem;
+}
+
+.features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.feature-card {
+    flex: 1 1 300px;
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+footer {
+    background-color: var(--dark-gray);
+    color: white;
+    padding: 1.5rem 0;
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.message {
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 4px;
+}
+
+.message.success {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #27ae60;
+    border: 1px solid #27ae60;
+}
+
+.message.error {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #c0392b;
+    border: 1px solid #c0392b;
+}
+
+@media (max-width: 768px) {
+    header .container {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .main-nav {
+        margin-top: 1rem;
+    }
+    
+    .main-nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .main-nav li {
+        margin: 0.5rem 0;
+    }
+    
+    .features {
+        flex-direction: column;
+    }
+} 

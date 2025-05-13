@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Information System - Student Portal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="site-title">University Database System</div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="students.html">Student Portal</a></li>
+                    <li><a href="professor.php">Professor Portal</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h1>Student Information Portal</h1>
+            <p>Access course information and student records through the forms below.</p>
+        </section>
+        
+        <section class="card">
+            <h2>Course Sections Information</h2>
+            <p>View all sections for a specific course, including classroom, schedule, and enrollment.</p>
+            <form action="course_sections.php" method="GET">
+                <div class="form-group">
+                    <label for="course_number">Enter Course Number (e.g., CS101):</label>
+                    <input type="text" id="course_number" name="course_number" required>
+                </div>
+                <button type="submit">View Sections</button>
+            </form>
+        </section>
+        
+        <section class="card">
+            <h2>Student Grade Information</h2>
+            <p>View all courses and grades for a specific student.</p>
+            <form action="student_grades.php" method="GET">
+                <div class="form-group">
+                    <label for="campus_id">Enter Student Campus ID (e.g., S10001):</label>
+                    <input type="text" id="campus_id" name="campus_id" required>
+                </div>
+                <button type="submit">View Grades</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 University Database System. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
