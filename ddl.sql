@@ -113,7 +113,7 @@ INSERT INTO Student VALUES
 ('S10007', 'Sophia', 'Lee', '707 Learning Court, Fullerton, CA 92842', '7145552345', '102', '101'),
 ('S10008', 'Mason', 'Anderson', '808 Education Way, Buena Park, CA 92843', '7145553456', '102', '000');
 
--- Insert Enrollment Records (15)
+-- Insert Enrollment Records (20)
 INSERT INTO Enrollment VALUES
 ('S10001', 1, 'A'),
 ('S10001', 2, 'B+'),
@@ -129,4 +129,9 @@ INSERT INTO Enrollment VALUES
 ('S10006', 2, 'A'),
 ('S10006', 5, 'A-'),
 ('S10007', 3, 'B+'),
-('S10008', 1, 'B-');
+('S10008', 1, 'B-'),
+('S10007', 4, 'A'),
+('S10007', 6, 'B'),
+('S10008', 2, 'C+'),
+('S10008', 3, 'B-'),
+('S10008', 5, 'A-')
