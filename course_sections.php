@@ -2,7 +2,7 @@
 $host = "mariadb";
 $username = "cs332t16";
 $password = "IU5mxYgd";
-$database = "university";
+$database = "University";
 
 $conn = new mysqli($host, $username, $password, $database);
 
