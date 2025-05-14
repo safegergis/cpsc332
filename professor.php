@@ -116,7 +116,7 @@ $conn->close();
             <nav class="main-nav">
                 <ul>
                     <li><a href="index.html">Home</a></li>
-                    <li><a href="students.php">Student Portal</a></li>
+                    <li><a href="students.html">Student Portal</a></li>
                     <li><a href="professor.php">Professor Portal</a></li>
                 </ul>
             </nav>
