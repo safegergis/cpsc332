@@ -47,7 +47,9 @@ if (isset($_POST['professor_submit']) && $professor_ssn) {
 }
 
 if (isset($_POST['grade_submit']) && $course_num && $section_num) {
-    $title_sql = "SELECT title FROM Course c, CourseSection cs WHERE c.course_num = cs.course_num AND c.course_num = ? AND cs.section_num = ?";
+    $title_sql = "SELECT c.title FROM Course c 
+                  JOIN CourseSection cs ON c.course_num = cs.course_num 
+                  WHERE c.course_num = ? AND cs.section_num = ?";
     $title_stmt = $conn->prepare($title_sql);
     $title_stmt->bind_param("ss", $course_num, $section_num);
     $title_stmt->execute();
@@ -57,11 +59,7 @@ if (isset($_POST['grade_submit']) && $course_num && $section_num) {
     if ($title_result->num_rows > 0) {
         $sql = "SELECT grade, COUNT(*) as count 
             FROM Enrollment 
-            WHERE cwid IN (
-                SELECT cwid 
-                FROM Enrollment 
-                WHERE section_num = ?
-            )
+            WHERE section_num = ?
             GROUP BY grade 
             ORDER BY 
             CASE 
@@ -83,7 +81,7 @@ if (isset($_POST['grade_submit']) && $course_num && $section_num) {
             END";
 
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $section_number);
+        $stmt->bind_param("i", $section_num);
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
@@ -92,13 +90,11 @@ if (isset($_POST['grade_submit']) && $course_num && $section_num) {
             while ($row = $result->fetch_assoc()) {
                 $grade_distribution[] = $row;
             }
-            $stmt->close();
         } else {
-            $grade_error = "No enrollment records found for section " . htmlspecialchars($section_number);
+            $grade_error = "No enrollment records found for section " . htmlspecialchars($section_num);
         }
     } else {
         $grade_error = "Course or section not found";
-        $stmt->close();
     }
 
 }
