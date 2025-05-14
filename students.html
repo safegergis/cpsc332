@@ -1,3 +1,161 @@
+<?php
+$host = "mariadb";
+$username = "cs332t16";
+$password = "IU5mxYgd";
+$database = "cs332t16";
+
+$conn = new mysqli($host, $username, $password, $database);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Course sections variables
+$course_num = isset($_GET['course_num']) ? $_GET['course_num'] : '';
+$course_info = [];
+$sections = [];
+$course_error = '';
+
+// Student grades variables
+$cwid = isset($_GET['cwid']) ? $_GET['cwid'] : '';
+$student_info = [];
+$grades = [];
+$student_error = '';
+
+// Process course sections request
+if ($course_num) {
+    $course_query = "SELECT title FROM Course WHERE course_num = ?";
+    $stmt = $conn->prepare($course_query);
+    $stmt->bind_param("s", $course_num);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $course_info = $result->fetch_assoc();
+        
+        $sections_query = "
+            SELECT 
+                s.section_number,
+                s.classroom,
+                s.meeting_days,
+                s.start_time,
+                s.end_time,
+                p.prof_name AS professor_name,
+                COUNT(e.cwid) AS enrollment_count
+            FROM 
+                CourseSection s
+                LEFT JOIN Enrollment e ON s.section_number = e.section_num
+                LEFT JOIN Professor p ON s.professor_ssn = p.ssn
+            WHERE 
+                s.course_num = ?
+            GROUP BY 
+                s.section_number, s.classroom, s.meeting_days, s.start_time, s.end_time, p.prof_name
+            ORDER BY 
+                s.section_number
+        ";
+        
+        $stmt = $conn->prepare($sections_query);
+        $stmt->bind_param("s", $course_num);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $sections[] = $row;
+            }
+        } else {
+            $course_error = "No sections found for this course.";
+        }
+    } else {
+        $course_error = "Course not found.";
+    }
+}
+
+// Process student grades request
+if ($cwid) {
+    $student_query = "SELECT first_name, last_name, d.dept_name AS major 
+                     FROM Student s
+                     JOIN Department d ON s.major = d.dept_num
+                     WHERE cwid = ?";
+    $stmt = $conn->prepare($student_query);
+    $stmt->bind_param("s", $cwid);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $student_info = $result->fetch_assoc();
+        
+        $grades_query = "
+            SELECT 
+                cs.course_num,
+                c.title AS course_title,
+                cs.section_number,
+                e.grade,
+                c.units,
+                d.dept_name AS department
+            FROM 
+                Enrollment e
+                JOIN CourseSection cs ON e.section_num = cs.section_number
+                JOIN Course c ON cs.course_num = c.course_num
+                JOIN Department d ON c.dept_number = d.dept_num
+            WHERE 
+                e.cwid = ?
+            ORDER BY 
+                cs.course_num, cs.section_number
+        ";
+        
+        $stmt = $conn->prepare($grades_query);
+        $stmt->bind_param("s", $cwid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $grades[] = $row;
+            }
+        } else {
+            $student_error = "No course history found for this student.";
+        }
+    } else {
+        $student_error = "Student not found.";
+    }
+}
+
+// GPA calculation function
+function calculateGPA($grades) {
+    $gradePoints = [
+        'A' => 4.0,
+        'A-' => 3.7,
+        'B+' => 3.3,
+        'B' => 3.0,
+        'B-' => 2.7,
+        'C+' => 2.3,
+        'C' => 2.0,
+        'C-' => 1.7,
+        'D+' => 1.3,
+        'D' => 1.0,
+        'D-' => 0.7,
+        'F' => 0.0
+    ];
+    
+    $totalPoints = 0;
+    $totalUnits = 0;
+    
+    foreach ($grades as $grade) {
+        if (isset($grade['grade']) && isset($gradePoints[$grade['grade']])) {
+            $totalPoints += $gradePoints[$grade['grade']] * $grade['units'];
+            $totalUnits += $grade['units'];
+        }
+    }
+    
+    return $totalUnits > 0 ? round($totalPoints / $totalUnits, 2) : 0;
+}
+
+$gpa = !empty($grades) ? calculateGPA($grades) : 0;
+
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +171,7 @@
             <nav class="main-nav">
                 <ul>
                     <li><a href="index.html">Home</a></li>
-                    <li><a href="students.html">Student Portal</a></li>
+                    <li><a href="students.php">Student Portal</a></li>
                     <li><a href="professor.php">Professor Portal</a></li>
                 </ul>
             </nav>
@@ -29,25 +187,107 @@
         <section class="card">
             <h2>Course Sections Information</h2>
             <p>View all sections for a specific course, including classroom, schedule, and enrollment.</p>
-            <form action="course_sections.php" method="GET">
+            <form action="students.php" method="GET">
                 <div class="form-group">
-                    <label for="course_number">Enter Course Number (e.g., CS101):</label>
-                    <input type="text" id="course_number" name="course_number" required>
+                    <label for="course_num">Enter Course Number (e.g., CS101):</label>
+                    <input type="text" id="course_num" name="course_num" required>
                 </div>
                 <button type="submit">View Sections</button>
             </form>
+            
+            <?php if ($course_num): ?>
+                <?php if (isset($course_info['title'])): ?>
+                    <h3 class="mt-4"><?php echo htmlspecialchars($course_num); ?>: <?php echo htmlspecialchars($course_info['title']); ?></h3>
+                    
+                    <?php if (!empty($sections)): ?>
+                        <table class="mt-3">
+                            <tr>
+                                <th>Section</th>
+                                <th>Classroom</th>
+                                <th>Meeting Days</th>
+                                <th>Time</th>
+                                <th>Professor</th>
+                                <th>Enrollment</th>
+                            </tr>
+                            <?php foreach ($sections as $section): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($section['section_number']); ?></td>
+                                    <td><?php echo htmlspecialchars($section['classroom']); ?></td>
+                                    <td><?php echo htmlspecialchars($section['meeting_days']); ?></td>
+                                    <td>
+                                        <?php 
+                                            $begin = date("g:i A", strtotime($section['start_time']));
+                                            $end = date("g:i A", strtotime($section['end_time']));
+                                            echo htmlspecialchars("$begin - $end"); 
+                                        ?>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($section['professor_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($section['enrollment_count']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </table>
+                    <?php else: ?>
+                        <p class="message error mt-3"><?php echo $course_error; ?></p>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <p class="message error mt-3"><?php echo $course_error; ?></p>
+                <?php endif; ?>
+            <?php endif; ?>
         </section>
         
         <section class="card">
             <h2>Student Grade Information</h2>
             <p>View all courses and grades for a specific student.</p>
-            <form action="student_grades.php" method="GET">
+            <form action="students.php" method="GET">
                 <div class="form-group">
-                    <label for="campus_id">Enter Student Campus ID (e.g., S10001):</label>
-                    <input type="text" id="campus_id" name="campus_id" required>
+                    <label for="cwid">Enter Student Campus ID (e.g., S10001):</label>
+                    <input type="text" id="cwid" name="cwid" required>
                 </div>
                 <button type="submit">View Grades</button>
             </form>
+            
+            <?php if ($cwid): ?>
+                <?php if (isset($student_info['first_name'])): ?>
+                    <div class="student-info mt-4">
+                        <h3>
+                            <?php echo htmlspecialchars($student_info['first_name'] . ' ' . $student_info['last_name']); ?> 
+                            (<?php echo htmlspecialchars($cwid); ?>)
+                        </h3>
+                        <p>Major: <?php echo htmlspecialchars($student_info['major']); ?></p>
+                    </div>
+                    
+                    <?php if (!empty($grades)): ?>
+                        <table class="mt-3">
+                            <tr>
+                                <th>Course</th>
+                                <th>Title</th>
+                                <th>Department</th>
+                                <th>Section</th>
+                                <th>Units</th>
+                                <th>Grade</th>
+                            </tr>
+                            <?php foreach ($grades as $grade): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($grade['course_num']); ?></td>
+                                    <td><?php echo htmlspecialchars($grade['course_title']); ?></td>
+                                    <td><?php echo htmlspecialchars($grade['department']); ?></td>
+                                    <td><?php echo htmlspecialchars($grade['section_number']); ?></td>
+                                    <td><?php echo htmlspecialchars($grade['units']); ?></td>
+                                    <td><?php echo is_null($grade['grade']) ? 'N/A' : htmlspecialchars($grade['grade']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </table>
+                        
+                        <div class="gpa-display mt-3">
+                            <strong>Overall GPA: <?php echo number_format($gpa, 2); ?></strong>
+                        </div>
+                    <?php else: ?>
+                        <p class="message error mt-3"><?php echo $student_error; ?></p>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <p class="message error mt-3"><?php echo $student_error; ?></p>
+                <?php endif; ?>
+            <?php endif; ?>
         </section>
     </main>
 
@@ -56,5 +296,23 @@
             <p>&copy; 2023 University Database System. All rights reserved.</p>
         </div>
     </footer>
+    
+    <style>
+    .mt-3 {
+        margin-top: 1rem;
+    }
+    .mt-4 {
+        margin-top: 1.5rem;
+    }
+    .gpa-display {
+        background-color: var(--light-gray);
+        padding: 0.75rem;
+        border-radius: 4px;
+        text-align: right;
+    }
+    .message.error {
+        color: var(--accent-color);
+    }
+    </style>
 </body>
 </html>

@@ -28,13 +28,13 @@ CREATE TABLE Department (
 
 -- Course table
 CREATE TABLE Course (
-    course_num CHAR(3) PRIMARY KEY,
+    course_num VARCHAR(10) PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     textbook VARCHAR(255) NOT NULL,
     units INT NOT NULL CHECK (units > 0),
     dept_num INT NOT NULL,
     FOREIGN KEY (dept_num) REFERENCES Department(dept_num),
-    prereq_course_num CHAR(3),
+    prereq_course_num VARCHAR(10),
     FOREIGN KEY (prereq_course_num) REFERENCES Course(course_num)
 );
 
@@ -48,7 +48,7 @@ CREATE TABLE CourseSection (
     end_time TIME NOT NULL,
     professor_ssn CHAR(9) NOT NULL,
     FOREIGN KEY (professor_ssn) REFERENCES Professor(ssn),
-    course_num CHAR(3) NOT NULL,
+    course_num VARCHAR(10) NOT NULL,
     FOREIGN KEY (course_num) REFERENCES Course(course_num),
     CHECK (start_time < end_time)
 );
@@ -88,19 +88,19 @@ INSERT INTO Department VALUES
 
 -- Insert Courses (4)
 INSERT INTO Course VALUES
-('101', 'Introduction to Programming', 'Python Fundamentals by Smith', 4, 101, NULL),
-('102', 'Data Structures', 'Algorithms and Data Structures by Johnson', 4, 101, '101'),
-('201', 'Calculus I', 'Calculus Made Simple by Williams', 3, 102, NULL),
-('202', 'Linear Algebra', 'Linear Algebra and Applications by Garcia', 3, 102, '201');
+('CS101', 'Introduction to Programming', 'Python Fundamentals by Smith', 4, 101, NULL),
+('CS102', 'Data Structures', 'Algorithms and Data Structures by Johnson', 4, 101, 'CS101'),
+('MATH101', 'Calculus I', 'Calculus Made Simple by Williams', 3, 102, NULL),
+('MATH201', 'Linear Algebra', 'Linear Algebra and Applications by Garcia', 3, 102, 'MATH101');
 
 -- Insert Course Sections (6)
 INSERT INTO CourseSection VALUES
-(1, 'CS112', 35, 'MWF', '09:00:00', '09:50:00', '123456789', '101'),
-(2, 'CS108', 30, 'TuTh', '11:00:00', '12:15:00', '123456789', '101'),
-(3, 'CS212', 25, 'MWF', '13:00:00', '13:50:00', '345678901', '102'),
-(4, 'Langsdorf 10', 40, 'MWF', '10:00:00', '10:50:00', '234567890', '201'),
-(5, 'Langsdorf 11', 35, 'TuTh', '14:00:00', '15:15:00', '234567890', '201'),
-(6, 'Langsdorf 12', 30, 'MWF', '15:00:00', '15:50:00', '234567890', '202');
+(1, 'CS112', 35, 'MWF', '09:00:00', '09:50:00', '123456789', 'CS101'),
+(2, 'CS108', 30, 'TuTh', '11:00:00', '12:15:00', '123456789', 'CS101'),
+(3, 'CS212', 25, 'MWF', '13:00:00', '13:50:00', '345678901', 'CS102'),
+(4, 'Langsdorf 10', 40, 'MWF', '10:00:00', '10:50:00', '234567890', 'MATH201'),
+(5, 'Langsdorf 11', 35, 'TuTh', '14:00:00', '15:15:00', '234567890', 'MATH201'),
+(6, 'Langsdorf 12', 30, 'MWF', '15:00:00', '15:50:00', '234567890', 'MATH201');
 
 -- Insert Students (8)
 INSERT INTO Student VALUES
