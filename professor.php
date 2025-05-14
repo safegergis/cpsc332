@@ -28,12 +28,12 @@ if (isset($_POST['professor_submit']) && $professor_ssn) {
             JOIN Course c ON s.course_num = c.course_num 
             JOIN Professor p ON s.professor_ssn = p.ssn 
             WHERE p.ssn = ?";
-    
+
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $professor_ssn);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             $professor_name = $row['professor_name'];
@@ -42,20 +42,20 @@ if (isset($_POST['professor_submit']) && $professor_ssn) {
     } else {
         $professor_error = "No classes found for professor with SSN: " . htmlspecialchars($professor_ssn);
     }
-    
+
     $stmt->close();
 }
 
-if (isset($_POST['grade_submit']) && $course_number && $section_number) {
+if (isset($_POST['grade_submit']) && $course_num && $section_num) {
     $title_sql = "SELECT title FROM Course c, CourseSection cs WHERE c.course_num = cs.course_num AND c.course_num = ? AND cs.section_num = ?";
     $title_stmt = $conn->prepare($title_sql);
-    $title_stmt->bind_param("ss", $course_number, $section_number);
+    $title_stmt->bind_param("ss", $course_num, $section_num);
     $title_stmt->execute();
     $title_result = $title_stmt->get_result();
     $course_title = ($title_result->num_rows > 0) ? $title_result->fetch_assoc()['title'] : "Unknown Course";
     $title_stmt->close();
-    
-    $sql = "SELECT grade, COUNT(*) as count 
+    if ($title_result->num_rows > 0) {
+        $sql = "SELECT grade, COUNT(*) as count 
             FROM Enrollment 
             WHERE cwid IN (
                 SELECT cwid 
@@ -81,20 +81,22 @@ if (isset($_POST['grade_submit']) && $course_number && $section_number) {
                 WHEN grade = 'I' THEN 14 
                 ELSE 15 
             END";
-    
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $section_number);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $grade_distribution[] = $row;
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $section_number);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $grade_distribution[] = $row;
+            }
+        } else {
+            $grade_error = "No enrollment records found for section " . htmlspecialchars($section_number);
         }
     } else {
-        $grade_error = "No enrollment records found for section " . htmlspecialchars($section_number);
+        $grade_error = "Course or section not found";
     }
-    
     $stmt->close();
 }
 
@@ -103,12 +105,14 @@ $conn->close();
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>University Database - Professor Portal</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <header>
         <div class="container">
@@ -128,19 +132,20 @@ $conn->close();
             <h1>Professor Portal</h1>
             <p>Access professor teaching schedules and course grade distributions.</p>
         </section>
-    
+
         <section class="card">
             <h2>Professor's Classes</h2>
             <p>Enter a professor's SSN to see their classes:</p>
-            
+
             <form method="post" action="">
                 <div class="form-group">
                     <label for="professor_ssn">Professor SSN:</label>
-                    <input type="text" id="professor_ssn" name="professor_ssn" placeholder="SSN (e.g., 123456789)" required>
+                    <input type="text" id="professor_ssn" name="professor_ssn" placeholder="SSN (e.g., 123456789)"
+                        required>
                 </div>
                 <input type="submit" name="professor_submit" value="Search">
             </form>
-            
+
             <?php if (isset($_POST['professor_submit'])): ?>
                 <?php if (!empty($professor_classes)): ?>
                     <h3>Classes for Professor: <?php echo htmlspecialchars($professor_name); ?></h3>
@@ -158,7 +163,8 @@ $conn->close();
                                 <td><?php echo htmlspecialchars($class['course_title']); ?></td>
                                 <td><?php echo htmlspecialchars($class['classroom']); ?></td>
                                 <td><?php echo htmlspecialchars($class['meeting_days']); ?></td>
-                                <td><?php echo htmlspecialchars($class['start_time']) . " - " . htmlspecialchars($class['end_time']); ?></td>
+                                <td><?php echo htmlspecialchars($class['start_time']) . " - " . htmlspecialchars($class['end_time']); ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </table>
@@ -167,24 +173,28 @@ $conn->close();
                 <?php endif; ?>
             <?php endif; ?>
         </section>
-        
+
         <section class="card">
             <h2>Grade Distribution</h2>
             <p>Enter a section number to see grade distribution:</p>
-            
+
             <form method="post" action="">
                 <div class="form-group">
                     <label for="course_num">Course Number:</label>
-                    <input type="text" id="course_num" name="course_num" placeholder="Course Number (e.g., CS101)" required>
+                    <input type="text" id="course_num" name="course_num" placeholder="Course Number (e.g., CS101)"
+                        required>
                     <label for="section_num">Section Number:</label>
-                    <input type="text" id="section_num" name="section_num" placeholder="Section Number (e.g., 1)" required>
+                    <input type="text" id="section_num" name="section_num" placeholder="Section Number (e.g., 1)"
+                        required>
                 </div>
                 <input type="submit" name="grade_submit" value="Search">
             </form>
-            
+
             <?php if (isset($_POST['grade_submit'])): ?>
                 <?php if (!empty($grade_distribution)): ?>
-                    <h3>Grade Distribution for Section <?php echo htmlspecialchars($section_number); ?>:</h3>
+                    <h3>Grade Distribution for <?php echo htmlspecialchars($course_title); ?> Section
+                        <?php echo htmlspecialchars($section_num); ?>:
+                    </h3>
                     <table>
                         <tr>
                             <th>Grade</th>
@@ -210,4 +220,5 @@ $conn->close();
         </div>
     </footer>
 </body>
-</html> 
+
+</html>
