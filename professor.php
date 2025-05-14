@@ -15,8 +15,8 @@ $professor_classes = [];
 $professor_name = "";
 $professor_error = '';
 
-$course_number = isset($_POST['course_num']) ? $_POST['course_num'] : '';
-$section_number = isset($_POST['section_num']) ? $_POST['section_num'] : '';
+$course_num = isset($_POST['course_num']) ? $_POST['course_num'] : '';
+$section_num = isset($_POST['section_num']) ? $_POST['section_num'] : '';
 $grade_distribution = [];
 $course_title = "";
 $grade_error = '';
@@ -92,7 +92,7 @@ if (isset($_POST['grade_submit']) && $course_num && $section_num) {
             $grade_distribution[] = $row;
         }
     } else {
-        $grade_error = "No enrollment records found for section " . htmlspecialchars($section_number);
+        $grade_error = "No enrollment records found for section " . htmlspecialchars($section_num);
     }
 
     $stmt->close();
