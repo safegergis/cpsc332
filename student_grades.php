@@ -32,19 +32,19 @@ if ($cwid) {
             SELECT 
                 cs.course_num,
                 c.title AS course_title,
-                cs.section_number,
+                cs.section_num,
                 e.grade,
                 c.units,
                 d.dept_name AS department
             FROM 
                 Enrollment e
-                JOIN CourseSection cs ON e.section_num = cs.section_number
+                JOIN CourseSection cs ON e.section_num = cs.section_num
                 JOIN Course c ON cs.course_num = c.course_num
                 JOIN Department d ON c.dept_number = d.dept_num
             WHERE 
                 e.cwid = ?
             ORDER BY 
-                cs.course_num, cs.section_number
+                cs.course_num, cs.section_num
         ";
         
         $stmt = $conn->prepare($grades_query);
