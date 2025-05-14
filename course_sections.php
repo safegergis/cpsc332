@@ -27,7 +27,7 @@ if ($course_num) {
         
         $sections_query = "
             SELECT 
-                s.section_number,
+                s.section_num,
                 s.classroom,
                 s.meeting_days,
                 s.start_time,
@@ -36,14 +36,14 @@ if ($course_num) {
                 COUNT(e.cwid) AS enrollment_count
             FROM 
                 CourseSection s
-                LEFT JOIN Enrollment e ON s.section_number = e.section_num
+                LEFT JOIN Enrollment e ON s.section_num = e.section_num
                 LEFT JOIN Professor p ON s.professor_ssn = p.ssn
             WHERE 
                 s.course_num = ?
             GROUP BY 
-                s.section_number, s.classroom, s.meeting_days, s.start_time, s.end_time, p.prof_name
+                s.section_num, s.classroom, s.meeting_days, s.start_time, s.end_time, p.prof_name
             ORDER BY 
-                s.section_number
+                s.section_num
         ";
         
         $stmt = $conn->prepare($sections_query);
