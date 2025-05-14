@@ -55,7 +55,8 @@ if (isset($_POST['grade_submit']) && $course_num && $section_num) {
     $course_title = ($title_result->num_rows > 0) ? $title_result->fetch_assoc()['title'] : "Unknown Course";
     $title_stmt->close();
 
-    $sql = "SELECT grade, COUNT(*) as count 
+    if ($title_result->num_rows > 0) {
+        $sql = "SELECT grade, COUNT(*) as count 
             FROM Enrollment 
             WHERE cwid IN (
                 SELECT cwid 
@@ -82,20 +83,22 @@ if (isset($_POST['grade_submit']) && $course_num && $section_num) {
                 ELSE 15 
             END";
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $section_number);
-    $stmt->execute();
-    $result = $stmt->get_result();
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $section_num);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $grade_distribution[] = $row;
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $grade_distribution[] = $row;
+            }
+        } else {
+            $grade_error = "No enrollment records found for section " . htmlspecialchars($section_num);
         }
+        $stmt->close();
     } else {
-        $grade_error = "No enrollment records found for section " . htmlspecialchars($section_num);
+        $grade_error = "No section found with course number " . htmlspecialchars($course_num) . " and section number " . htmlspecialchars($section_num);
     }
-
-    $stmt->close();
 }
 
 $conn->close();
