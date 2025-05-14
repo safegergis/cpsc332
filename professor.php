@@ -86,18 +86,21 @@ if (isset($_POST['grade_submit']) && $course_num && $section_num) {
         $stmt->bind_param("i", $section_number);
         $stmt->execute();
         $result = $stmt->get_result();
+        $stmt->close();
 
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 $grade_distribution[] = $row;
             }
+            $stmt->close();
         } else {
             $grade_error = "No enrollment records found for section " . htmlspecialchars($section_number);
         }
     } else {
         $grade_error = "Course or section not found";
+        $stmt->close();
     }
-    $stmt->close();
+
 }
 
 $conn->close();
