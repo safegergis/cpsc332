@@ -47,19 +47,21 @@ if (isset($_POST['professor_submit']) && $professor_ssn) {
 }
 
 if (isset($_POST['grade_submit']) && $course_num && $section_num) {
-    $title_sql = "SELECT c.title FROM Course c 
-                  JOIN CourseSection cs ON c.course_num = cs.course_num 
-                  WHERE c.course_num = ? AND cs.section_num = ?";
+    $title_sql = "SELECT title FROM Course c JOIN CourseSection cs ON c.course_num = cs.course_num WHERE c.course_num = ? AND cs.section_num = ?";
     $title_stmt = $conn->prepare($title_sql);
     $title_stmt->bind_param("ss", $course_num, $section_num);
     $title_stmt->execute();
     $title_result = $title_stmt->get_result();
     $course_title = ($title_result->num_rows > 0) ? $title_result->fetch_assoc()['title'] : "Unknown Course";
     $title_stmt->close();
-    if ($title_result->num_rows > 0) {
-        $sql = "SELECT grade, COUNT(*) as count 
+
+    $sql = "SELECT grade, COUNT(*) as count 
             FROM Enrollment 
-            WHERE section_num = ?
+            WHERE cwid IN (
+                SELECT cwid 
+                FROM Enrollment 
+                WHERE section_num = ?
+            )
             GROUP BY grade 
             ORDER BY 
             CASE 
@@ -80,23 +82,20 @@ if (isset($_POST['grade_submit']) && $course_num && $section_num) {
                 ELSE 15 
             END";
 
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $section_num);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $stmt->close();
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $section_number);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $grade_distribution[] = $row;
-            }
-        } else {
-            $grade_error = "No enrollment records found for section " . htmlspecialchars($section_num);
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $grade_distribution[] = $row;
         }
     } else {
-        $grade_error = "Course or section not found";
+        $grade_error = "No enrollment records found for section " . htmlspecialchars($section_number);
     }
 
+    $stmt->close();
 }
 
 $conn->close();
@@ -191,9 +190,8 @@ $conn->close();
 
             <?php if (isset($_POST['grade_submit'])): ?>
                 <?php if (!empty($grade_distribution)): ?>
-                    <h3>Grade Distribution for <?php echo htmlspecialchars($course_title); ?> Section
-                        <?php echo htmlspecialchars($section_num); ?>:
-                    </h3>
+
+                    <h3>Grade Distribution for Section <?php echo htmlspecialchars($section_num); ?>:</h3>
                     <table>
                         <tr>
                             <th>Grade</th>
