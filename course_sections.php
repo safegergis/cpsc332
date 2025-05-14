@@ -108,7 +108,7 @@ $conn->close();
                             </tr>
                             <?php foreach ($sections as $section): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($section['section_number']); ?></td>
+                                    <td><?php echo htmlspecialchars($section['section_num']); ?></td>
                                     <td><?php echo htmlspecialchars($section['classroom']); ?></td>
                                     <td><?php echo htmlspecialchars($section['meeting_days']); ?></td>
                                     <td>
