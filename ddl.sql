@@ -1,7 +1,4 @@
--- Create database
-CREATE DATABASE University;
-
-USE University;
+USE cs332t16;
 
 -- Professor table
 CREATE TABLE Professor (
