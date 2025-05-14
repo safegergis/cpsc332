@@ -37,7 +37,7 @@ CREATE TABLE Course (
     units INT NOT NULL CHECK (units > 0),
     dept_number INT NOT NULL,
     FOREIGN KEY (dept_number) REFERENCES Department(dept_num)
-    prereq_course_num VARCHAR(10) NOT NULL,     -- Can be null??
+    prereq_course_num VARCHAR(10) NOT NULL,
     FOREIGN KEY (prereq_course_num) REFERENCES Course(course_num)
 );
 
@@ -64,7 +64,7 @@ CREATE TABLE Student (
     address VARCHAR(157) NOT NULL,
     phone_num CHAR(10) NOT NULL,
     major CHAR(4) NOT NULL,
-    minor CHAR(4) NOT NULL      -- Can be null?
+    minor CHAR(4) NOT NULL
 );
 
 -- Enrollment table
@@ -97,30 +97,24 @@ INSERT INTO Course VALUES
 
 -- Insert Course Sections (6)
 INSERT INTO CourseSection VALUES
-('CS101', 1, 'CS112', 35, 'MWF', '09:00:00', '09:50:00', '123456789'),
-('CS101', 2, 'CS108', 30, 'TuTh', '11:00:00', '12:15:00', '123456789'),
-('CS201', 1, 'CS212', 25, 'MWF', '13:00:00', '13:50:00', '345678901'),
-('MATH101', 1, 'Langsdorf 10', 40, 'MWF', avl '10:00:00', '10:50:00', '234567890'),
-('MATH101', 2, 'Langsdorf 11', 35, 'TuTh', '14:00:00', '15:15:00', '234567890'),
-('MATH201', 1, 'Langsdorf 12', 30, 'MWF', '15:00:00', '15:50:00', '234567890');
+('CS101', 1, 'CS112', 35, 'MWF', '09:00:00', '09:50:00', '123456789', 000),
+('CS101', 2, 'CS108', 30, 'TuTh', '11:00:00', '12:15:00', '123456789', 000),
+('CS201', 1, 'CS212', 25, 'MWF', '13:00:00', '13:50:00', '345678901', CS101),
+('MATH101', 1, 'Langsdorf 10', 40, 'MWF', avl '10:00:00', '10:50:00', '234567890', 000),
+('MATH101', 2, 'Langsdorf 11', 35, 'TuTh', '14:00:00', '15:15:00', '234567890', 000),
+('MATH201', 1, 'Langsdorf 12', 30, 'MWF', '15:00:00', '15:50:00', '234567890', MATH101);
 
 -- Insert Students (8)
 INSERT INTO Student VALUES
-('S10001', 'Emma', 'Davis', '101 University Drive, Fullerton, CA 92836', '7145556789', 101),
-('S10002', 'Noah', 'Martinez', '202 College Avenue, Fullerton, CA 92837', '7145557890', 101),
-('S10003', 'Olivia', 'Smith', '303 Campus Road, Anaheim, CA 92838', '7145558901', 102),
-('S10004', 'Liam', 'Garcia', '404 Academic Street, Fullerton, CA 92839', '7145559012', 102),
-('S10005', 'Ava', 'Brown', '505 Scholar Lane, Fullerton, CA 92840', '7145550123', 101),
-('S10006', 'Ethan', 'Wilson', '606 Research Boulevard, Orange, CA 92841', '7145551234', 101),
-('S10007', 'Sophia', 'Lee', '707 Learning Court, Fullerton, CA 92842', '7145552345', 102),
-('S10008', 'Mason', 'Anderson', '808 Education Way, Buena Park, CA 92843', '7145553456', 102);
+('S10001', 'Emma', 'Davis', '101 University Drive, Fullerton, CA 92836', '7145556789', 101, 102),
+('S10002', 'Noah', 'Martinez', '202 College Avenue, Fullerton, CA 92837', '7145557890', 101, 000),
+('S10003', 'Olivia', 'Smith', '303 Campus Road, Anaheim, CA 92838', '7145558901', 102, 101),
+('S10004', 'Liam', 'Garcia', '404 Academic Street, Fullerton, CA 92839', '7145559012', 102, 000),
+('S10005', 'Ava', 'Brown', '505 Scholar Lane, Fullerton, CA 92840', '7145550123', 101, 102),
+('S10006', 'Ethan', 'Wilson', '606 Research Boulevard, Orange, CA 92841', '7145551234', 101, 000),
+('S10007', 'Sophia', 'Lee', '707 Learning Court, Fullerton, CA 92842', '7145552345', 102, 101),
+('S10008', 'Mason', 'Anderson', '808 Education Way, Buena Park, CA 92843', '7145553456', 102, 000);
 
--- Insert Student Minors
--- INSERT INTO StudentMinor VALUES
--- ('S10001', 102),
--- ('S10003', 101),
--- ('S10005', 102),
--- ('S10007', 101);
 
 -- Insert Enrollment Records (20)
 INSERT INTO Enrollment VALUES
