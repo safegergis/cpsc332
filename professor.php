@@ -47,9 +47,9 @@ if (isset($_POST['professor_submit']) && $professor_ssn) {
 }
 
 if (isset($_POST['grade_submit']) && $course_number && $section_number) {
-    $title_sql = "SELECT title FROM Course WHERE course_num = ?";
+    $title_sql = "SELECT title FROM Course c, CourseSection cs WHERE c.course_num = cs.course_num AND c.course_num = ? AND cs.section_num = ?";
     $title_stmt = $conn->prepare($title_sql);
-    $title_stmt->bind_param("s", $course_number);
+    $title_stmt->bind_param("ss", $course_number, $section_number);
     $title_stmt->execute();
     $title_result = $title_stmt->get_result();
     $course_title = ($title_result->num_rows > 0) ? $title_result->fetch_assoc()['title'] : "Unknown Course";
@@ -206,7 +206,7 @@ $conn->close();
 
     <footer>
         <div class="container">
-            <p>&copy; 2023 University Database System. All rights reserved.</p>
+            <p>Safe Gergis and Brandon Cobb; CPSC 332 Final Project</p>
         </div>
     </footer>
 </body>

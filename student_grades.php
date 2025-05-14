@@ -177,7 +177,7 @@ $gpa = !empty($grades) ? calculateGPA($grades) : 0;
 
     <footer>
         <div class="container">
-            <p>&copy; <?php echo date('Y'); ?> University Database System. All rights reserved.</p>
+            <p>Safe Gergis and Brandon Cobb; CPSC 332 Final Project</p>
         </div>
     </footer>
 </body>

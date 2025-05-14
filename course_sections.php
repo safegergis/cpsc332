@@ -138,7 +138,7 @@ $conn->close();
 
     <footer>
         <div class="container">
-            <p>&copy; 2023 University Database System. All rights reserved.</p>
+            <p>Safe Gergis and Brandon Cobb; CPSC 332 Final Project</p>
         </div>
     </footer>
 </body>
