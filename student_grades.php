@@ -17,7 +17,7 @@ $error = '';
 
 if ($cwid) {
     // Get student information
-    $student_query = "SELECT first_name, last_name, major
+    $student_query = "SELECT first_name, last_name
                      FROM Student
                      WHERE cwid = ?";
     $stmt = $conn->prepare($student_query);
@@ -140,7 +140,6 @@ $gpa = !empty($grades) ? calculateGPA($grades) : 0;
                             <?php echo htmlspecialchars($student_info['first_name'] . ' ' . $student_info['last_name']); ?> 
                             (<?php echo htmlspecialchars($cwid); ?>)
                         </h2>
-                        <p>Major: <?php echo htmlspecialchars($student_info['major']); ?></p>
                         <p>GPA: <?php echo number_format($gpa, 2); ?></p>
                     </div>
                     

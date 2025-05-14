@@ -15,8 +15,8 @@ $professor_classes = [];
 $professor_name = "";
 $professor_error = '';
 
-$course_number = isset($_POST['course_number']) ? $_POST['course_number'] : '';
-$section_number = isset($_POST['section_number']) ? $_POST['section_number'] : '';
+$course_number = isset($_POST['course_num']) ? $_POST['course_num'] : '';
+$section_number = isset($_POST['section_num']) ? $_POST['section_num'] : '';
 $grade_distribution = [];
 $course_title = "";
 $grade_error = '';
@@ -174,8 +174,10 @@ $conn->close();
             
             <form method="post" action="">
                 <div class="form-group">
-                    <label for="section_number">Section Number:</label>
-                    <input type="text" id="section_number" name="section_number" placeholder="Section Number (e.g., 1)" required>
+                    <label for="course_num">Course Number:</label>
+                    <input type="text" id="course_num" name="course_num" placeholder="Course Number (e.g., CS101)" required>
+                    <label for="section_num">Section Number:</label>
+                    <input type="text" id="section_num" name="section_num" placeholder="Section Number (e.g., 1)" required>
                 </div>
                 <input type="submit" name="grade_submit" value="Search">
             </form>
