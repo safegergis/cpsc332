@@ -10,18 +10,18 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$campus_id = isset($_GET['campus_id']) ? $_GET['campus_id'] : '';
+$cwid = isset($_GET['cwid']) ? $_GET['cwid'] : '';
 $student_info = [];
 $grades = [];
 $error = '';
 
-if ($campus_id) {
-    $student_query = "SELECT first_name, last_name, d.name AS major 
+if ($cwid) {
+    $student_query = "SELECT first_name, last_name, d.dept_name AS major 
                      FROM Student s
-                     JOIN Department d ON s.major_dept = d.dept_number
-                     WHERE campus_id = ?";
+                     JOIN Department d ON s.major = d.dept_num
+                     WHERE cwid = ?";
     $stmt = $conn->prepare($student_query);
-    $stmt->bind_param("s", $campus_id);
+    $stmt->bind_param("s", $cwid);
     $stmt->execute();
     $result = $stmt->get_result();
     
@@ -30,24 +30,25 @@ if ($campus_id) {
         
         $grades_query = "
             SELECT 
-                e.course_number,
+                cs.course_num,
                 c.title AS course_title,
-                e.section_number,
+                cs.section_number,
                 e.grade,
                 c.units,
-                d.name AS department
+                d.dept_name AS department
             FROM 
                 Enrollment e
-                JOIN Course c ON e.course_number = c.course_number
-                JOIN Department d ON c.dept_number = d.dept_number
+                JOIN CourseSection cs ON e.section_num = cs.section_number
+                JOIN Course c ON cs.course_num = c.course_num
+                JOIN Department d ON c.dept_number = d.dept_num
             WHERE 
-                e.campus_id = ?
+                e.cwid = ?
             ORDER BY 
-                e.course_number, e.section_number
+                cs.course_num, cs.section_number
         ";
         
         $stmt = $conn->prepare($grades_query);
-        $stmt->bind_param("s", $campus_id);
+        $stmt->bind_param("s", $cwid);
         $stmt->execute();
         $result = $stmt->get_result();
         
@@ -123,12 +124,12 @@ $gpa = !empty($grades) ? calculateGPA($grades) : 0;
         <section class="card">
             <h1>Student Grade Information</h1>
             
-            <?php if ($campus_id): ?>
+            <?php if ($cwid): ?>
                 <?php if (isset($student_info['first_name'])): ?>
                     <div class="student-info card">
                         <h2>
                             <?php echo htmlspecialchars($student_info['first_name'] . ' ' . $student_info['last_name']); ?> 
-                            (<?php echo htmlspecialchars($campus_id); ?>)
+                            (<?php echo htmlspecialchars($cwid); ?>)
                         </h2>
                         <p>Major: <?php echo htmlspecialchars($student_info['major']); ?></p>
                     </div>
@@ -145,7 +146,7 @@ $gpa = !empty($grades) ? calculateGPA($grades) : 0;
                             </tr>
                             <?php foreach ($grades as $grade): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($grade['course_number']); ?></td>
+                                    <td><?php echo htmlspecialchars($grade['course_num']); ?></td>
                                     <td><?php echo htmlspecialchars($grade['course_title']); ?></td>
                                     <td><?php echo htmlspecialchars($grade['department']); ?></td>
                                     <td><?php echo htmlspecialchars($grade['section_number']); ?></td>

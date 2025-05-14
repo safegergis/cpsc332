@@ -10,15 +10,15 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$course_number = isset($_GET['course_number']) ? $_GET['course_number'] : '';
+$course_num = isset($_GET['course_num']) ? $_GET['course_num'] : '';
 $course_info = [];
 $sections = [];
 $error = '';
 
-if ($course_number) {
-    $course_query = "SELECT title FROM Course WHERE course_number = ?";
+if ($course_num) {
+    $course_query = "SELECT title FROM Course WHERE course_num = ?";
     $stmt = $conn->prepare($course_query);
-    $stmt->bind_param("s", $course_number);
+    $stmt->bind_param("s", $course_num);
     $stmt->execute();
     $result = $stmt->get_result();
     
@@ -30,24 +30,24 @@ if ($course_number) {
                 s.section_number,
                 s.classroom,
                 s.meeting_days,
-                s.begin_time,
+                s.start_time,
                 s.end_time,
-                p.name AS professor_name,
-                COUNT(e.campus_id) AS enrollment_count
+                p.prof_name AS professor_name,
+                COUNT(e.cwid) AS enrollment_count
             FROM 
-                Section s
-                LEFT JOIN Enrollment e ON s.course_number = e.course_number AND s.section_number = e.section_number
+                CourseSection s
+                LEFT JOIN Enrollment e ON s.section_number = e.section_num
                 LEFT JOIN Professor p ON s.professor_ssn = p.ssn
             WHERE 
-                s.course_number = ?
+                s.course_num = ?
             GROUP BY 
-                s.section_number, s.classroom, s.meeting_days, s.begin_time, s.end_time, p.name
+                s.section_number, s.classroom, s.meeting_days, s.start_time, s.end_time, p.prof_name
             ORDER BY 
                 s.section_number
         ";
         
         $stmt = $conn->prepare($sections_query);
-        $stmt->bind_param("s", $course_number);
+        $stmt->bind_param("s", $course_num);
         $stmt->execute();
         $result = $stmt->get_result();
         
@@ -92,9 +92,9 @@ $conn->close();
         <section class="card">
             <h1>Course Sections Information</h1>
             
-            <?php if ($course_number): ?>
+            <?php if ($course_num): ?>
                 <?php if (isset($course_info['title'])): ?>
-                    <h2><?php echo htmlspecialchars($course_number); ?>: <?php echo htmlspecialchars($course_info['title']); ?></h2>
+                    <h2><?php echo htmlspecialchars($course_num); ?>: <?php echo htmlspecialchars($course_info['title']); ?></h2>
                     
                     <?php if (!empty($sections)): ?>
                         <table>
@@ -113,7 +113,7 @@ $conn->close();
                                     <td><?php echo htmlspecialchars($section['meeting_days']); ?></td>
                                     <td>
                                         <?php 
-                                            $begin = date("g:i A", strtotime($section['begin_time']));
+                                            $begin = date("g:i A", strtotime($section['start_time']));
                                             $end = date("g:i A", strtotime($section['end_time']));
                                             echo htmlspecialchars("$begin - $end"); 
                                         ?>

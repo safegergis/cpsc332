@@ -22,10 +22,10 @@ $course_title = "";
 $grade_error = '';
 
 if (isset($_POST['professor_submit']) && $professor_ssn) {
-    $sql = "SELECT p.name AS professor_name, c.title AS course_title, 
-            s.classroom, s.meeting_days, s.begin_time, s.end_time 
-            FROM Section s 
-            JOIN Course c ON s.course_number = c.course_number 
+    $sql = "SELECT p.prof_name AS professor_name, c.title AS course_title, 
+            s.classroom, s.meeting_days, s.start_time, s.end_time 
+            FROM CourseSection s 
+            JOIN Course c ON s.course_num = c.course_num 
             JOIN Professor p ON s.professor_ssn = p.ssn 
             WHERE p.ssn = ?";
     
@@ -47,7 +47,7 @@ if (isset($_POST['professor_submit']) && $professor_ssn) {
 }
 
 if (isset($_POST['grade_submit']) && $course_number && $section_number) {
-    $title_sql = "SELECT title FROM Course WHERE course_number = ?";
+    $title_sql = "SELECT title FROM Course WHERE course_num = ?";
     $title_stmt = $conn->prepare($title_sql);
     $title_stmt->bind_param("s", $course_number);
     $title_stmt->execute();
@@ -57,7 +57,11 @@ if (isset($_POST['grade_submit']) && $course_number && $section_number) {
     
     $sql = "SELECT grade, COUNT(*) as count 
             FROM Enrollment 
-            WHERE course_number = ? AND section_number = ? 
+            WHERE cwid IN (
+                SELECT cwid 
+                FROM Enrollment 
+                WHERE section_num = ?
+            )
             GROUP BY grade 
             ORDER BY 
             CASE 
@@ -79,7 +83,7 @@ if (isset($_POST['grade_submit']) && $course_number && $section_number) {
             END";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $course_number, $section_number);
+    $stmt->bind_param("i", $section_number);
     $stmt->execute();
     $result = $stmt->get_result();
     
@@ -88,7 +92,7 @@ if (isset($_POST['grade_submit']) && $course_number && $section_number) {
             $grade_distribution[] = $row;
         }
     } else {
-        $grade_error = "No enrollment records found for " . htmlspecialchars($course_number) . " section " . htmlspecialchars($section_number);
+        $grade_error = "No enrollment records found for section " . htmlspecialchars($section_number);
     }
     
     $stmt->close();
@@ -154,7 +158,7 @@ $conn->close();
                                 <td><?php echo htmlspecialchars($class['course_title']); ?></td>
                                 <td><?php echo htmlspecialchars($class['classroom']); ?></td>
                                 <td><?php echo htmlspecialchars($class['meeting_days']); ?></td>
-                                <td><?php echo htmlspecialchars($class['begin_time']) . " - " . htmlspecialchars($class['end_time']); ?></td>
+                                <td><?php echo htmlspecialchars($class['start_time']) . " - " . htmlspecialchars($class['end_time']); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </table>
@@ -166,13 +170,9 @@ $conn->close();
         
         <section class="card">
             <h2>Grade Distribution</h2>
-            <p>Enter a course number and section number to see grade distribution:</p>
+            <p>Enter a section number to see grade distribution:</p>
             
             <form method="post" action="">
-                <div class="form-group">
-                    <label for="course_number">Course Number:</label>
-                    <input type="text" id="course_number" name="course_number" placeholder="Course Number (e.g., CS101)" required>
-                </div>
                 <div class="form-group">
                     <label for="section_number">Section Number:</label>
                     <input type="text" id="section_number" name="section_number" placeholder="Section Number (e.g., 1)" required>
@@ -182,7 +182,7 @@ $conn->close();
             
             <?php if (isset($_POST['grade_submit'])): ?>
                 <?php if (!empty($grade_distribution)): ?>
-                    <h3>Grade Distribution for <?php echo htmlspecialchars($course_title); ?> (Section <?php echo htmlspecialchars($section_number); ?>):</h3>
+                    <h3>Grade Distribution for Section <?php echo htmlspecialchars($section_number); ?>:</h3>
                     <table>
                         <tr>
                             <th>Grade</th>
