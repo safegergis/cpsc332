@@ -16,9 +16,9 @@ $grades = [];
 $error = '';
 
 if ($cwid) {
-    $student_query = "SELECT first_name, last_name, d.dept_name AS major 
-                     FROM Student s
-                     JOIN Department d ON s.major = d.dept_num
+    // Get student information
+    $student_query = "SELECT first_name, last_name, major
+                     FROM Student
                      WHERE cwid = ?";
     $stmt = $conn->prepare($student_query);
     $stmt->bind_param("s", $cwid);
@@ -28,9 +28,10 @@ if ($cwid) {
     if ($result->num_rows > 0) {
         $student_info = $result->fetch_assoc();
         
+        // Get course enrollment and grades
         $grades_query = "
             SELECT 
-                cs.course_num,
+                c.course_num,
                 c.title AS course_title,
                 cs.section_num,
                 e.grade,
@@ -40,11 +41,11 @@ if ($cwid) {
                 Enrollment e
                 JOIN CourseSection cs ON e.section_num = cs.section_num
                 JOIN Course c ON cs.course_num = c.course_num
-                JOIN Department d ON c.dept_number = d.dept_num
+                JOIN Department d ON c.dept_num = d.dept_num
             WHERE 
                 e.cwid = ?
             ORDER BY 
-                cs.course_num, cs.section_num
+                c.course_num, cs.section_num
         ";
         
         $stmt = $conn->prepare($grades_query);
@@ -103,7 +104,7 @@ $gpa = !empty($grades) ? calculateGPA($grades) : 0;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Grades - University Information System</title>
+    <title>Student Course Grades</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -122,19 +123,29 @@ $gpa = !empty($grades) ? calculateGPA($grades) : 0;
 
     <main class="container">
         <section class="card">
-            <h1>Student Grade Information</h1>
+            <h1>Student Course Grades</h1>
+            
+            <form method="get" action="student_grades.php" class="search-form">
+                <div class="form-group">
+                    <label for="cwid">Enter Campus Wide ID:</label>
+                    <input type="text" id="cwid" name="cwid" value="<?php echo htmlspecialchars($cwid); ?>" required>
+                    <button type="submit" class="btn">View Grades</button>
+                </div>
+            </form>
             
             <?php if ($cwid): ?>
                 <?php if (isset($student_info['first_name'])): ?>
-                    <div class="student-info card">
+                    <div class="student-info">
                         <h2>
                             <?php echo htmlspecialchars($student_info['first_name'] . ' ' . $student_info['last_name']); ?> 
                             (<?php echo htmlspecialchars($cwid); ?>)
                         </h2>
                         <p>Major: <?php echo htmlspecialchars($student_info['major']); ?></p>
+                        <p>GPA: <?php echo number_format($gpa, 2); ?></p>
                     </div>
                     
                     <?php if (!empty($grades)): ?>
+                        <h3>Course History</h3>
                         <table>
                             <tr>
                                 <th>Course</th>
@@ -149,32 +160,25 @@ $gpa = !empty($grades) ? calculateGPA($grades) : 0;
                                     <td><?php echo htmlspecialchars($grade['course_num']); ?></td>
                                     <td><?php echo htmlspecialchars($grade['course_title']); ?></td>
                                     <td><?php echo htmlspecialchars($grade['department']); ?></td>
-                                    <td><?php echo htmlspecialchars($grade['section_number']); ?></td>
+                                    <td><?php echo htmlspecialchars($grade['section_num']); ?></td>
                                     <td><?php echo htmlspecialchars($grade['units']); ?></td>
                                     <td><?php echo is_null($grade['grade']) ? 'N/A' : htmlspecialchars($grade['grade']); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </table>
-                        
-                        <div class="gpa-display">
-                            Overall GPA: <?php echo number_format($gpa, 2); ?>
-                        </div>
                     <?php else: ?>
                         <p class="message error"><?php echo $error; ?></p>
                     <?php endif; ?>
                 <?php else: ?>
                     <p class="message error"><?php echo $error; ?></p>
                 <?php endif; ?>
-            <?php else: ?>
-                <p>Please enter a student ID to view grades.</p>
-                <p><a href="students.html" class="btn">Back to Student Portal</a></p>
             <?php endif; ?>
         </section>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2023 University Database System. All rights reserved.</p>
+            <p>&copy; <?php echo date('Y'); ?> University Database System. All rights reserved.</p>
         </div>
     </footer>
 </body>
